@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrenador Virtual</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <div class="hero-main">
+          <p class="eyebrow">Entrenador Virtual</p>
+          <h1>Panel diario</h1>
+          <div class="hero-actions">
+            <button id="start-session-button" class="hero-action hero-action-primary" type="button">
+              <span class="hero-action-title">Iniciar Sesion Programada</span>
+              <span class="hero-action-note">Capturar Datos De Hoy</span>
+            </button>
+            <button id="view-history-button" class="hero-action hero-action-secondary" type="button">
+              <span class="hero-action-title">Ver Registros Anteriores</span>
+              <span class="hero-action-note">Sesiones Previas</span>
+            </button>
+            <button id="view-records-button" class="hero-action hero-action-tertiary" type="button">
+              <span class="hero-action-title">Ir A Records</span>
+              <span class="hero-action-note">RM Y Marcas Actuales</span>
+            </button>
+          </div>
+        </div>
+        <div class="hero-status">
+          <p class="hero-status-label">Hoy</p>
+          <div class="hero-status-grid">
+            <article class="hero-stat">
+              <span class="hero-stat-label">Dolor Medial</span>
+              <strong id="hero-pain-value" class="hero-stat-value">Sin Dato</strong>
+            </article>
+            <article class="hero-stat">
+              <span class="hero-stat-label">Readiness</span>
+              <strong id="hero-readiness-value" class="hero-stat-value">Sin Dato</strong>
+            </article>
+            <article class="hero-stat">
+              <span class="hero-stat-label">Foco</span>
+              <strong id="hero-focus-value" class="hero-stat-value">Sin Dato</strong>
+            </article>
+          </div>
+          <p id="status-line" class="hero-status-note">Conectando...</p>
+        </div>
+      </section>
+
+      <section id="main-screen" class="layout-grid screen screen-active">
+        <aside class="panel">
+          <div class="panel-heading">
+            <p class="section-kicker">Perfil base</p>
+            <h2>Memoria permanente</h2>
+          </div>
+          <div id="profile-summary" class="stack"></div>
+        </aside>
+
+        <aside id="history-panel" class="panel">
+          <div class="panel-heading">
+            <p class="section-kicker">Historial relevante</p>
+            <h2>Sesiones previas</h2>
+          </div>
+          <div id="context-summary" class="stack"></div>
+        </aside>
+
+        <section id="checkin-panel" class="panel panel-collapsed" data-session-capture>
+          <div class="panel-heading">
+            <p class="section-kicker">Entrada diaria</p>
+            <h2>Check-in</h2>
+          </div>
+
+          <form id="checkin-form" class="data-form">
+            <label class="field">
+              <span>Fecha</span>
+              <input id="checkin-date" name="date" type="date" required>
+            </label>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Peso corporal</span>
+                <input id="checkin-bodyweight" name="bodyweight" type="number" min="50" max="150" step="0.1" required>
+              </label>
+
+              <label class="field">
+                <span>Horas de sueno</span>
+                <input id="checkin-sleep" name="sleep_hours" type="number" min="0" max="14" step="0.5" required>
+              </label>
+            </div>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Readiness (0-10)</span>
+                <input id="checkin-readiness" name="readiness" type="number" min="0" max="10" step="1" required>
+              </label>
+
+              <label class="field">
+                <span>Tiempo disponible (min)</span>
+                <input id="checkin-time" name="available_time_min" type="number" min="20" max="240" step="5" required>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Sesion planeada</span>
+              <select id="checkin-planned" name="session_type_planned">
+                <option value="mesa">Mesa</option>
+                <option value="specific_aw">Especifico AW</option>
+                <option value="multiarticular">Multiarticular</option>
+                <option value="recovery">Recuperacion</option>
+              </select>
+            </label>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Dolor medial codo derecho</span>
+                <input id="checkin-medial-pain" name="medial_elbow_right" type="number" min="0" max="10" step="1" required>
+              </label>
+
+              <label class="field">
+                <span>Fatiga global</span>
+                <input id="checkin-global-fatigue" name="global_fatigue" type="number" min="0" max="10" step="1" required>
+              </label>
+            </div>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Fatiga antebrazo / mano</span>
+                <input id="checkin-forearm-fatigue" name="forearm_hand_fatigue" type="number" min="0" max="10" step="1" required>
+              </label>
+
+              <label class="field">
+                <span>Fatiga espalda</span>
+                <input id="checkin-back-fatigue" name="back_fatigue" type="number" min="0" max="10" step="1" required>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Fatiga pierna</span>
+              <input id="checkin-legs-fatigue" name="legs_fatigue" type="number" min="0" max="10" step="1" required>
+            </label>
+
+            <button class="button button-primary" type="submit">Guardar check-in y recalcular</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <p class="section-kicker">Decision del dia</p>
+            <h2>Recomendacion</h2>
+          </div>
+
+          <div id="recommendation-shell" class="stack"></div>
+          <div id="scoring-shell" class="stack compact-stack"></div>
+          <button id="recommend-button" class="button button-secondary" type="button">Recalcular con contexto actual</button>
+        </section>
+
+        <section id="session-log-panel" class="panel panel-wide panel-collapsed" data-session-capture>
+          <div class="panel-heading">
+            <p class="section-kicker">Bitacora</p>
+            <h2>Registrar sesion real</h2>
+          </div>
+
+          <form id="session-form" class="data-form">
+            <div class="field-grid">
+              <label class="field">
+                <span>Fecha</span>
+                <input id="session-date" name="date" type="date" required>
+              </label>
+
+              <label class="field">
+                <span>Tipo de sesion</span>
+                <select id="session-type" name="session_type">
+                  <option value="mesa_sparring">Mesa / sparring</option>
+                  <option value="mesa_tecnica">Mesa tecnica</option>
+                  <option value="specific_aw">Especifico AW</option>
+                  <option value="multiarticular_fuerza">Multiarticular fuerza</option>
+                  <option value="recovery_tissue">Recuperacion / tejido</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Objetivo de la sesion</span>
+                <input id="session-goal" name="goal_of_session" type="text" placeholder="rising_y_hook_alto" required>
+              </label>
+
+              <label class="field">
+                <span>RPE de la sesion</span>
+                <input id="session-rpe" name="effort_rpe_session" type="number" min="0" max="10" step="0.5" required>
+              </label>
+            </div>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Mejor patron</span>
+                <input id="session-best-pattern" name="best_pattern" type="text" placeholder="cupping_defensivo">
+              </label>
+
+              <label class="field">
+                <span>Mejor condicion de agarre</span>
+                <input id="session-best-grip" name="best_grip_condition" type="text" placeholder="profundo_y_bajo">
+              </label>
+            </div>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Limitacion principal</span>
+                <input id="session-main-limitation" name="main_limitation" type="text" placeholder="rising">
+              </label>
+
+              <label class="field">
+                <span>Dolor medial durante sesion</span>
+                <input id="session-medial-pain" name="medial_pain" type="number" min="0" max="10" step="1" required>
+              </label>
+            </div>
+
+            <div class="toggle-grid">
+              <label class="toggle">
+                <input id="session-could-stop" name="could_stop" type="checkbox">
+                <span>Pude parar</span>
+              </label>
+
+              <label class="toggle">
+                <input id="session-could-move" name="could_move" type="checkbox">
+                <span>Pude mover</span>
+              </label>
+
+              <label class="toggle">
+                <input id="session-could-finish" name="could_finish" type="checkbox">
+                <span>Pude finalizar</span>
+              </label>
+            </div>
+
+            <div class="exercise-builder">
+              <div class="builder-header">
+                <div>
+                  <p class="section-kicker">Logger fino</p>
+                  <h3>Ejercicios de la sesion</h3>
+                </div>
+                <button id="add-exercise-row" class="button button-ghost button-small" type="button">Agregar ejercicio</button>
+              </div>
+              <div id="exercise-rows" class="exercise-rows"></div>
+            </div>
+
+            <button class="button button-primary" type="submit">Guardar sesion</button>
+          </form>
+        </section>
+      </section>
+
+      <section id="performance-screen" class="layout-grid screen screen-hidden">
+        <section class="panel panel-wide">
+          <div class="panel-heading">
+            <p class="section-kicker">Rendimiento</p>
+            <h2>Objetivos y direccion actual</h2>
+          </div>
+          <div id="performance-goals" class="stack"></div>
+        </section>
+
+        <section class="panel panel-wide">
+          <div class="panel-heading">
+            <p class="section-kicker">Contexto estrategico</p>
+            <h2>Datos clave del ciclo</h2>
+          </div>
+          <div id="performance-data" class="stack"></div>
+        </section>
+
+        <section id="records-panel" class="panel panel-wide">
+          <div class="panel-heading">
+            <p class="section-kicker">Records actuales</p>
+            <h2>Mejores marcas y RM por ejercicio</h2>
+          </div>
+          <div id="exercise-records" class="stack"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.bundle.js"></script>
+  </body>
+</html>

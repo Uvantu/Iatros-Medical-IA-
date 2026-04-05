@@ -4345,104 +4345,128 @@ async function loadIPPCycle() {
     container.innerHTML = buildPreviousSessionCards(sessions, exerciseEntries, 6);
   }
   function getRuntimeUiBridge() {
-    return typeof window !== "undefined" ? window.__ENTRENADOR_UI_BRIDGE__ || null : null;
-  }
-  function buildRuntimeUiHelpers() {
-    return {
-      escapeHtml,
-      formatUiText,
-      formatDecimal,
-      buildRouteBreakdownSummary
-    };
-  }
-  function renderRecommendation(container, scoringContainer, recommendation) {
-    const bridge = getRuntimeUiBridge();
-    if (bridge?.renderRecommendation) {
-      return bridge.renderRecommendation(
-        container,
-        scoringContainer,
-        recommendation,
-        buildRuntimeUiHelpers()
-      );
-    }
-    const payload = recommendation?.session_recommendation;
+  return typeof window !== "undefined" ? window.__ENTRENADOR_UI_BRIDGE__ || null : null;
+}
 
-    if (!payload) {
-      container.innerHTML = '<div class="empty-note">No hay recomendación heurística disponible.</div>';
-      scoringContainer.innerHTML = "";
-      return;
-    }
+function buildRuntimeUiHelpers() {
+  return {
+    escapeHtml,
+    formatUiText,
+    formatDecimal,
+    buildRouteBreakdownSummary
+  };
+}
 
+function renderBridgeFallback(container, scoringContainer, title, detail = "") {
+  if (container) {
     container.innerHTML = `
-    <article class="recommendation-card">
-      <h3>${escapeHtml(payload.label || "Recomendación del día")}</h3>
-      <div class="recommendation-meta">
-        <p>${escapeHtml(payload.explanation || "Sin explicación disponible.")}</p>
-        <div>
-          <strong>Por que va primero</strong>
-          <ul class="list">
-            ${(Array.isArray(payload.reason) ? payload.reason : []).map((reason) => `<li>${escapeHtml(formatUiText(reason))}</li>`).join("")}
-          </ul>
-        </div>
+      <div class="empty-note">
+        ${escapeHtml(title)}
       </div>
-    </article>
-  `;
+    `;
+  }
 
-    scoringContainer.innerHTML = `
-    <article class="stat-block">
-      <h3>Detalles</h3>
-      <ul class="list">
-        ${(Array.isArray(payload.priority_factors) ? payload.priority_factors : []).map((item) => `<li>${escapeHtml(formatUiText(item))}</li>`).join("")}
-      </ul>
-    </article>
-  `;
+  if (scoringContainer) {
+    scoringContainer.innerHTML = detail
+      ? `
+        <article class="stat-block">
+          <h3>Fallback local</h3>
+          <p class="muted">${escapeHtml(detail)}</p>
+        </article>
+      `
+      : "";
   }
-  function buildRouteBreakdownSummary(route) {
-    const breakdown = route?.scoreBreakdown || {};
-    const parts = [];
-    if (breakdown.transferToTable !== void 0) {
-      parts.push(`mesa ${formatDecimal(breakdown.transferToTable, 2)}`);
-    }
-    if (breakdown.offensiveImprovement !== void 0) {
-      parts.push(`ofensiva ${formatDecimal(breakdown.offensiveImprovement, 2)}`);
-    }
-    if (breakdown.tissueSustainability !== void 0) {
-      parts.push(`tejido ${formatDecimal(breakdown.tissueSustainability, 2)}`);
-    }
-    if (breakdown.continuityRobustness !== void 0) {
-      parts.push(`robustez ${formatDecimal(breakdown.continuityRobustness, 2)}`);
-    }
-    return parts.join(" | ");
+}
+
+function renderRecommendation(container, scoringContainer, recommendation) {
+  const bridge = getRuntimeUiBridge();
+
+  if (bridge?.renderRecommendation) {
+    return bridge.renderRecommendation(
+      container,
+      scoringContainer,
+      recommendation,
+      buildRuntimeUiHelpers()
+    );
   }
-  function buildRouteRoleLabel(role) {
-    const bridge = getRuntimeUiBridge();
-    if (bridge?.buildRouteRoleLabel) {
-      return bridge.buildRouteRoleLabel(role);
-    }
-    switch (role) {
-      case "primary":
-        return "Ruta Principal";
-      case "alternative":
-        return "Ruta Alternativa";
-      case "contingency":
-        return "Ruta De Contingencia";
-      default:
-        return "Ruta";
-    }
+
+  const payload = recommendation?.session_recommendation;
+
+  if (!payload) {
+    renderBridgeFallback(
+      container,
+      scoringContainer,
+      "No hay recomendación heurística disponible."
+    );
+    return;
   }
-  function buildRouteCard(route, role) {
-    if (!route) {
-      return "";
-    }
-    const currentBlock = route?.route?.blocks?.[0] || null;
-    const blockLabel = currentBlock?.blockLabel || "Sin bloque";
-    const scenarioLabel = currentBlock?.scenarioLabel || "Sin escenario";
-    const weakest = Array.isArray(route?.route?.predictedSummary?.weakestPredictedFactors) ? route.route.predictedSummary.weakestPredictedFactors.map((item) => formatUiText(item)).join(", ") : "Sin dato";
-    return `
+
+  renderBridgeFallback(
+    container,
+    scoringContainer,
+    "Bridge UI no disponible. Se omitió el render heurístico enriquecido.",
+    `Etiqueta prevista: ${payload.label || "Sin dato"}`
+  );
+}
+
+function buildRouteBreakdownSummary(route) {
+  const breakdown = route?.scoreBreakdown || {};
+  const parts = [];
+
+  if (breakdown.transferToTable !== void 0) {
+    parts.push(`mesa ${formatDecimal(breakdown.transferToTable, 2)}`);
+  }
+  if (breakdown.offensiveImprovement !== void 0) {
+    parts.push(`ofensiva ${formatDecimal(breakdown.offensiveImprovement, 2)}`);
+  }
+  if (breakdown.tissueSustainability !== void 0) {
+    parts.push(`tejido ${formatDecimal(breakdown.tissueSustainability, 2)}`);
+  }
+  if (breakdown.continuityRobustness !== void 0) {
+    parts.push(`robustez ${formatDecimal(breakdown.continuityRobustness, 2)}`);
+  }
+
+  return parts.join(" | ");
+}
+
+function buildRouteRoleLabel(role) {
+  const bridge = getRuntimeUiBridge();
+
+  if (bridge?.buildRouteRoleLabel) {
+    return bridge.buildRouteRoleLabel(role);
+  }
+
+  switch (role) {
+    case "primary":
+      return "Ruta Principal";
+    case "alternative":
+      return "Ruta Alternativa";
+    case "contingency":
+      return "Ruta de Contingencia";
+    default:
+      return "Ruta";
+  }
+}
+
+function buildRouteCard(route, role) {
+  if (!route) {
+    return "";
+  }
+
+  const currentBlock = route?.route?.blocks?.[0] || null;
+  const blockLabel = currentBlock?.blockLabel || "Sin bloque";
+  const scenarioLabel = currentBlock?.scenarioLabel || "Sin escenario";
+  const weakest = Array.isArray(route?.route?.predictedSummary?.weakestPredictedFactors)
+    ? route.route.predictedSummary.weakestPredictedFactors.map((item) => formatUiText(item)).join(", ")
+    : "Sin dato";
+
+  return `
     <article class="stat-block">
       <div class="score-row-head">
         <h3>${escapeHtml(buildRouteRoleLabel(role))}</h3>
-        <span class="pill ${role === "primary" ? "" : "pill-muted"}">Score ${escapeHtml(formatDecimal(route.totalScore, 2))}</span>
+        <span class="pill ${role === "primary" ? "" : "pill-muted"}">
+          Score ${escapeHtml(formatDecimal(route.totalScore, 2))}
+        </span>
       </div>
       <p class="muted"><strong>${escapeHtml(route.label || route.routeId)}</strong></p>
       <p class="muted">Bloque actual: ${escapeHtml(blockLabel)} | Escenario: ${escapeHtml(scenarioLabel)}</p>
@@ -4454,142 +4478,66 @@ async function loadIPPCycle() {
     </article>
   `;
 }
-  function renderAdaptiveRecommendation(container, scoringContainer, recommendation) {
-    const bridge = getRuntimeUiBridge();
-    if (bridge?.renderAdaptiveRecommendation) {
-      return bridge.renderAdaptiveRecommendation(
-        container,
-        scoringContainer,
-        recommendation,
-        buildRuntimeUiHelpers()
-      );
-    }
-    if (!recommendation) {
-      container.innerHTML = '<div class="empty-note">No hay recomendacion adaptativa disponible todavia.</div>';
-      scoringContainer.innerHTML = "";
-      return;
-    }
 
-    const nextSession = recommendation.nextSessionRecommendation || {};
-    const currentBlock = recommendation.currentBlockRecommendation || null;
-    const ipp = recommendation.ipp || null;
-    const ippVersion = recommendation.ippVersion || "IPP1";
+function renderAdaptiveRecommendation(container, scoringContainer, recommendation) {
+  const bridge = getRuntimeUiBridge();
 
-    const renderAdaptiveExerciseList = (items = []) => {
-      if (!Array.isArray(items) || items.length === 0) {
-        return '<li>Sin ejercicios definidos.</li>';
-      }
-
-      return items.map((item) => {
-        const exerciseName = formatUiText(item?.exerciseName || item?.exerciseKey || "ejercicio");
-        const side = item?.side ? ` (${formatUiText(item.side)})` : "";
-        const target = item?.target || "Sin objetivo";
-        const why = item?.why ? ` | ${item.why}` : "";
-        return `<li><strong>${escapeHtml(exerciseName)}${escapeHtml(side)}</strong>: ${escapeHtml(target)}${escapeHtml(why)}</li>`;
-      }).join("");
-    };
-
-    const robustnessRaw = ipp?.robustnessScore ?? ipp?.robustness_score;
-    const fragilityRaw = ipp?.setupFragility ?? ipp?.setup_fragility;
-    const readinessRaw = ipp?.latentReadiness ?? ipp?.latent_readiness;
-    const tissueRaw = ipp?.latentTissueIrritability ?? ipp?.latent_tissue_irritability;
-    const posteriorRaw = ipp?.posteriorExpectedSuccess ?? ipp?.posterior_expected_success;
-
-    const robustness = Number.isFinite(Number(robustnessRaw)) ? Number(robustnessRaw).toFixed(2) : "Sin dato";
-    const fragility = Number.isFinite(Number(fragilityRaw)) ? Number(fragilityRaw).toFixed(3) : "Sin dato";
-    const readiness = Number.isFinite(Number(readinessRaw)) ? Number(readinessRaw).toFixed(2) : "Sin dato";
-    const tissue = Number.isFinite(Number(tissueRaw)) ? Number(tissueRaw).toFixed(2) : "Sin dato";
-    const posterior = Number.isFinite(Number(posteriorRaw))
-      ? `${(Number(posteriorRaw) <= 1 ? Number(posteriorRaw) * 100 : Number(posteriorRaw)).toFixed(1)}%`
-      : "Sin dato";
-
-    const ippSummaryMarkup = ipp
-      ? `
-        <div class="compact-stack">
-          <strong>${escapeHtml(ippVersion)}</strong>
-          <p class="muted">${escapeHtml(`Robustez ${robustness} | Fragilidad ${fragility} | Readiness ${readiness} | Tejido ${tissue} | Exito posterior ${posterior}`)}</p>
-        </div>
-      `
-      : "";
-
-    container.innerHTML = `
-      <article class="recommendation-card">
-        <h3>${escapeHtml(nextSession.sessionLabel || "Siguiente Sesion")}</h3>
-        <div class="recommendation-meta">
-          <p>${escapeHtml(currentBlock ? `Bloque actual: ${currentBlock.suggestedBlockLabel}.` : "Sin bloque actual definido.")}</p>
-          ${ippSummaryMarkup}
-          <div>
-            <strong>Ejercicios Prioritarios</strong>
-            <ul class="list">
-              ${renderAdaptiveExerciseList(nextSession.primaryExercises)}
-            </ul>
-          </div>
-          <div>
-            <strong>Apoyo Del Dia</strong>
-            <ul class="list">
-              ${renderAdaptiveExerciseList(nextSession.supportiveExercises)}
-            </ul>
-          </div>
-        </div>
-      </article>
-    `;
-
-    const explanationText = Array.isArray(recommendation.explanation)
-      ? recommendation.explanation.join(" ")
-      : (Array.isArray(nextSession.rationale) ? nextSession.rationale.join(" ") : "");
-
-    scoringContainer.innerHTML = `
-      <article class="stat-block">
-        <h3>Restricciones Y Logica</h3>
-        <ul class="list">
-          ${(nextSession.restrictions?.length > 0 ? nextSession.restrictions : ["Sin restriccion dominante."])
-            .map((item) => `<li>${escapeHtml(item)}</li>`)
-            .join("")}
-        </ul>
-        <div class="compact-stack">
-          <p class="muted">${escapeHtml(explanationText)}</p>
-        </div>
-      </article>
-      ${ipp ? `
-      <article class="stat-block">
-        <h3>Resumen ${escapeHtml(ippVersion)}</h3>
-        <ul class="list">
-          <li>${escapeHtml(`Robustez: ${robustness}`)}</li>
-          <li>${escapeHtml(`Fragilidad setup: ${fragility}`)}</li>
-          <li>${escapeHtml(`Readiness latente: ${readiness}`)}</li>
-          <li>${escapeHtml(`Irritabilidad tisular: ${tissue}`)}</li>
-          <li>${escapeHtml(`Exito posterior estimado: ${posterior}`)}</li>
-        </ul>
-      </article>
-      ` : ""}
-    `;
+  if (bridge?.renderAdaptiveRecommendation) {
+    return bridge.renderAdaptiveRecommendation(
+      container,
+      scoringContainer,
+      recommendation,
+      buildRuntimeUiHelpers()
+    );
   }
-  function renderSimulationRoutes(container, recommendation) {
-    const bridge = getRuntimeUiBridge();
-    if (bridge?.renderSimulationRoutes) {
-      return bridge.renderSimulationRoutes(
-        container,
-        recommendation,
-        buildRuntimeUiHelpers()
-      );
-    }
-    if (!recommendation) {
-      container.innerHTML = '<div class="empty-note">Todavía no hay rutas simuladas disponibles.</div>';
-      return;
-    }
-    const primary = recommendation.primaryRoute || null;
-    const alternative = recommendation.alternativeRoute || null;
-    const contingency = recommendation.contingencyRoute || null;
-    container.innerHTML = `
-    <div class="summary-grid">
-      ${buildRouteCard(primary, "primary")}
-      ${buildRouteCard(alternative, "alternative")}
-    </div>
-    <div class="summary-grid">
-      ${buildRouteCard(contingency, "contingency")}
+
+  if (!recommendation) {
+    renderBridgeFallback(
+      container,
+      scoringContainer,
+      "No hay recomendación adaptativa disponible todavía."
+    );
+    return;
+  }
+
+  const nextSession = recommendation?.nextSessionRecommendation || {};
+  const currentBlock = recommendation?.currentBlockRecommendation || null;
+
+  renderBridgeFallback(
+    container,
+    scoringContainer,
+    "Bridge UI no disponible. Se omitió el render adaptativo enriquecido.",
+    `Sesión prevista: ${nextSession.sessionLabel || "Sin dato"} | Bloque: ${currentBlock?.suggestedBlockLabel || "Sin dato"}`
+  );
+}
+
+function renderSimulationRoutes(container, recommendation) {
+  const bridge = getRuntimeUiBridge();
+
+  if (bridge?.renderSimulationRoutes) {
+    return bridge.renderSimulationRoutes(
+      container,
+      recommendation,
+      buildRuntimeUiHelpers()
+    );
+  }
+
+  if (!container) {
+    return;
+  }
+
+  if (!recommendation) {
+    container.innerHTML = '<div class="empty-note">Todavía no hay rutas simuladas disponibles.</div>';
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="empty-note">
+      Bridge UI no disponible. Se omitió el render detallado de rutas simuladas.
     </div>
   `;
-  }
+}
+
   function renderPostSessionInsight(container, insight) {
     if (!insight) {
       container.innerHTML = '<div class="empty-note">Todav\xEDa no hay una sesi\xF3n suficiente para leer qu\xE9 funcion\xF3 y qu\xE9 se debe priorizar despu\xE9s.</div>';
@@ -5645,6 +5593,7 @@ return;
   }
   init();
 })();
+
 
 
 

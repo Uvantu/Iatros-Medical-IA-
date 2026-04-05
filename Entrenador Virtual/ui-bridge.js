@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
   function buildRouteRoleLabel(role) {
     switch (role) {
       case "primary":
@@ -60,9 +60,7 @@
   }
 
   function renderSimulationRoutes(container, recommendation, helpers = {}) {
-    if (!container) {
-      return;
-    }
+    if (!container) return;
 
     if (!recommendation) {
       container.innerHTML = '<div class="empty-note">Todavia no hay rutas simuladas disponibles.</div>';
@@ -235,7 +233,7 @@
     buildRouteRoleClass,
     buildRouteCard,
     renderSimulationRoutes,
-    renderAdaptiveRecommendation,
-    renderRecommendation
+    renderRecommendation,
+    renderAdaptiveRecommendation
   };
 })();

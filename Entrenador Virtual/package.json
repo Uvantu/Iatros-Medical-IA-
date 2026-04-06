@@ -4,8 +4,12 @@
   "type": "module",
   "scripts": {
     "build": "npx --yes esbuild src/app.js --bundle --platform=browser --format=iife --outfile=app.bundle.js",
+    "build:ui-bridge": "node scripts/build-ui-bridge.mjs",
     "check": "node --check server.js && node --check src/app.js && node --check src/engine.js && node --check src/storage.js && node --check src/ui.js && node --check src/seed.js",
     "serve": "node server.js --port 8000",
     "simulate": "node scripts/simulate-progressions.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
   }
 }

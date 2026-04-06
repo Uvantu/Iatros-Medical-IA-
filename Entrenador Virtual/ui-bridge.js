@@ -6,7 +6,7 @@
       case "alternative":
         return "Ruta Alternativa";
       case "contingency":
-        return "Ruta De Contingencia";
+        return "Ruta de Contingencia";
       default:
         return "Ruta";
     }
@@ -89,7 +89,7 @@
     const payload = recommendation?.session_recommendation;
 
     if (!payload) {
-      container.innerHTML = '<div class="empty-note">No hay recomendacion heuristica disponible.</div>';
+      container.innerHTML = '<div class="empty-note">No hay recomendación heurística disponible.</div>';
       scoringContainer.innerHTML = "";
       return;
     }
@@ -128,7 +128,7 @@
     }
 
     if (!recommendation) {
-      container.innerHTML = '<div class="empty-note">No hay recomendacion adaptativa disponible todavia.</div>';
+      container.innerHTML = '<div class="empty-note">No hay recomendación adaptativa disponible todavía.</div>';
       scoringContainer.innerHTML = "";
       return;
     }
@@ -177,7 +177,7 @@
 
     container.innerHTML = `
       <article class="recommendation-card">
-        <h3>${escapeHtml(nextSession.sessionLabel || "Siguiente Sesion")}</h3>
+        <h3>${escapeHtml(nextSession.sessionLabel || "Siguiente sesion")}</h3>
         <div class="recommendation-meta">
           <p>${escapeHtml(currentBlock ? `Bloque actual: ${currentBlock.suggestedBlockLabel}.` : "Sin bloque actual definido.")}</p>
           ${ippSummaryMarkup}
@@ -203,7 +203,7 @@
 
     scoringContainer.innerHTML = `
       <article class="stat-block">
-        <h3>Restricciones Y Logica</h3>
+        <h3>Restricciones Y logica</h3>
         <ul class="list">
           ${(nextSession.restrictions?.length > 0 ? nextSession.restrictions : ["Sin restriccion dominante."])
             .map((item) => `<li>${escapeHtml(item)}</li>`)
@@ -221,7 +221,7 @@
           <li>${escapeHtml(`Fragilidad setup: ${fragility}`)}</li>
           <li>${escapeHtml(`Readiness latente: ${readiness}`)}</li>
           <li>${escapeHtml(`Irritabilidad tisular: ${tissue}`)}</li>
-          <li>${escapeHtml(`Exito posterior estimado: ${posterior}`)}</li>
+          <li>${escapeHtml(`Éxito posterior estimado: ${posterior}`)}</li>
         </ul>
       </article>
       ` : ""}

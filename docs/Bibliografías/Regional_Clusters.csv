@@ -1,0 +1,9 @@
+cluster_id,cluster_name,country_priority,state_priority,city_priority,age_bias,skill_bias,english_tolerance,default_output_mode,notes
+CL_001,MX_GENERAL,México,*,*,adolescente-adulto,novato-intermedio,bajo-medio,publico_simple_es,Cluster base para México general.
+CL_002,MX_NORTE_REDES,México,Norte,*,adolescente-adulto joven,intermedio,medio,dual_es_en,Mayor tolerancia a anglicismos por redes y competencia.
+CL_003,MX_POPULAR_LOCAL,México,*,*,adolescente-adulto,novato,bajo,publico_simple_es,Lenguaje popular más directo y menos técnico.
+CL_004,LATAM_GENERAL,LatAm,*,*,adolescente-adulto,novato-intermedio,bajo-medio,publico_simple_es,Cluster amplio para español neutral.
+CL_005,ANDINO_URBANO,Colombia/Perú/Ecuador,*,urbano,adolescente-adulto,intermedio,medio,dual_es_en,Intermedio urbano con mezcla gradual.
+CL_006,RIOPLATENSE,Argentina/Uruguay,*,*,adolescente-adulto,intermedio,medio,dual_es_en,Puede aceptar tecnicismo si está bien contextualizado.
+CL_007,US_LATINO_BILINGUE,USA latino,*,*,adolescente-adulto,intermedio-avanzado,medio-alto,dual_es_en,Mayor naturalidad con mezcla inglés-español.
+CL_008,GLOBAL_COMPETITIVE,global,*,*,adulto,avanzado-experto,alto,tecnico_con_alias,Capa competitiva/global.

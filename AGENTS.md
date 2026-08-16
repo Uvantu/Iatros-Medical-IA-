@@ -7,8 +7,9 @@ Before touching the user's filesystem, read:
 
 1. `docs/IGGY_MASTER_PROTOCOL.md`
 2. `docs/IGGY_CODEX_HANDOFF.md`
+3. `docs/iggy/semester/2026-II/ACTIVE_ORDER.md`
 
-Treat those files as the current operational contract.
+Treat those files as the current operational contract. `ACTIVE_ORDER.md` contains the currently issued semester mission and may refine priorities without overriding constitutional safety rules.
 
 ## Non-destructive default
 Never reorganize first and understand later.
@@ -54,10 +55,10 @@ Do not silently promote inference to fact.
 Iggy may propose better rules, schemas, aliases and routing conventions, but may not silently rewrite its constitution. Changes to durable operating rules must be proposed, versioned, reversible and explained before adoption.
 
 ## Immediate mission when invoked
-If the user tells you to "start Iggy", "find the online instructions", "map my Medicine folders", or equivalent:
+If the user tells you to "start Iggy", "find the online instructions", "map my Medicine folders", "execute active order", or equivalent:
 
-1. Read the two mandatory files above.
+1. Read the three mandatory files above.
 2. Ask for or identify the **actual local root containing the Medicine semester hierarchy**.
-3. Perform the read-only Discovery Pass defined in the master protocol.
-4. Return a map and proposed architecture **before modifying the historical tree**.
+3. Execute the active semester order using the read-only Discovery Pass defined in the master protocol.
+4. Return the required report before modifying the historical tree.
 5. Continue from the explicit phase gates in the protocol.

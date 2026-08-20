@@ -1,0 +1,29 @@
+{
+  "version": "0.1.0",
+  "description": "Codebook mínimo para extracción clínica trazable desde PDFs médicos.",
+  "clinical_variable_role_codes": [
+    {"code": "VAR_DEF_OP", "label": "Definición operativa"},
+    {"code": "VAR_DX_CRIT", "label": "Criterio diagnóstico"},
+    {"code": "VAR_SEV_CRIT", "label": "Criterio de severidad"},
+    {"code": "VAR_DD_KEY", "label": "Dato discriminador"},
+    {"code": "VAR_TX_FIRST", "label": "Tratamiento inicial"},
+    {"code": "VAR_TX_AVOID", "label": "Tratamiento a evitar"},
+    {"code": "VAR_NEXT_STEP", "label": "Siguiente paso"},
+    {"code": "VAR_CONFIRMATORY_TEST", "label": "Estudio confirmatorio"},
+    {"code": "VAR_MONITORING", "label": "Monitorización"},
+    {"code": "VAR_CONTRAINDICATION", "label": "Contraindicación"},
+    {"code": "VAR_TIME_WINDOW", "label": "Ventana de tiempo"},
+    {"code": "VAR_COMPLICATION", "label": "Complicación decisiva"}
+  ],
+  "trigger_type_codes": [
+    {"code": "TEXTUAL_RULE", "label": "Regla textual"},
+    {"code": "NUMERIC_THRESHOLD", "label": "Punto de corte numérico"}
+  ],
+  "quality_statuses": [
+    "CERTIFIED_LOCKED",
+    "MEDICAL_REVIEW_PENDING",
+    "QUESTION_READY",
+    "QUESTION_REVIEW_REQUIRED",
+    "QUESTION_BLOCKED"
+  ]
+}

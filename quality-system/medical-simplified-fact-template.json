@@ -1,0 +1,21 @@
+{
+  "fact_id": "SF-sourcefile-p12-fact-slug",
+  "canonical_fact_key": "severidad.preeclampsia-criterios-gravedad",
+  "fact_group": "severidad",
+  "fact_label": "criterios de gravedad",
+  "fact_value_summary": "Resumen operacional del hecho.",
+  "keywords": ["cefalea persistente", "plaquetas < 100000"],
+  "entities": ["TA", "Proteinuria", "Plaquetas"],
+  "categories": ["severidad", "urgencias"],
+  "source_trace": {
+    "source_file_name": "preeclampsiaGER.pdf",
+    "locator": {
+      "page": 12,
+      "section_hint": "severidad"
+    },
+    "raw_fragment": "Texto fuente tal como aparece en la guía.",
+    "normalized_fragment": "Regla clínica ya limpiada pero fiel a la fuente.",
+    "page_text_excerpt": "Fragmento contextual de la página para verificar la traza."
+  },
+  "status": "MEDICAL_REVIEW_PENDING"
+}

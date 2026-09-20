@@ -1,0 +1,50 @@
+{
+  "identity": {
+    "record_id": "MER-sourcefile-p12-fact-slug",
+    "source_type": "PDF_GUIDELINE",
+    "created_by": "reviewer",
+    "created_at": "2026-04-03T00:00:00.000Z"
+  },
+  "classification": {
+    "clinical_variable_role_code": "VAR_DX_CRIT",
+    "trigger_type_code": "TEXTUAL_RULE",
+    "topic_slug": "diagnostico",
+    "extraction_intent": "TRACEABLE_CLINICAL_RULE"
+  },
+  "source_trace": {
+    "source_file_name": "preeclampsiaGER.pdf",
+    "locator": {
+      "page": 12,
+      "section_hint": "severidad"
+    },
+    "raw_fragment": "Texto fuente tal como aparece en la guía.",
+    "normalized_fragment": "Regla clínica ya limpiada pero todavía fiel a la fuente.",
+    "page_text_excerpt": "Fragmento contextual de la página para verificar la traza."
+  },
+  "normalized_content": {
+    "statement_short": "criterio de severidad",
+    "statement_operational": "Regla operativa lista para reutilizarse en preguntas y filtros.",
+    "keywords": ["cefalea persistente", "plaquetas < 100000"],
+    "entities": ["TA", "Proteinuria", "Plaquetas"],
+    "trigger_logic": "Si aparece el criterio descrito, activar severidad.",
+    "clinical_action": "Hospitalizar y estabilizar.",
+    "avoid_action": ""
+  },
+  "simplified_projection": {
+    "canonical_fact_key": "severidad.preeclampsia-criterios-gravedad",
+    "fact_group": "severidad",
+    "fact_label": "criterios de gravedad",
+    "fact_value_summary": "Resumen operacional del hecho.",
+    "min_keywords": ["gravedad", "plaquetas", "cefalea"],
+    "categories": ["severidad", "urgencias"]
+  },
+  "quality": {
+    "semantic_guardrails": {
+      "requires_exact_locator": true,
+      "requires_raw_fragment": true,
+      "forbids_unstated_inference": true
+    },
+    "review_status": "CERTIFIED_LOCKED",
+    "notes": ""
+  }
+}

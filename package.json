@@ -3,10 +3,22 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "engines": {
+    "node": ">=22.5.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "iggy:init": "node iggy-engine/cli.mjs init",
+    "iggy:ingest": "node iggy-engine/cli.mjs ingest",
+    "iggy:observe": "node iggy-engine/cli.mjs observe",
+    "iggy:cycle": "node iggy-engine/cli.mjs cycle",
+    "iggy:audit": "node iggy-engine/cli.mjs audit",
+    "iggy:status": "node iggy-engine/cli.mjs status",
+    "iggy:research-queue": "node iggy-engine/cli.mjs research-queue",
+    "iggy:serve": "node iggy-engine/server.mjs",
+    "test:iggy": "node --test tests/iggy-engine.test.mjs"
   },
   "dependencies": {
     "pdfjs-dist": "^4.3.136",

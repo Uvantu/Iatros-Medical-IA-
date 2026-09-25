@@ -20,23 +20,17 @@ export class IggyLiveEngine {
   }
 
   ingest({ kbDir = null, manifestPath = null } = {}) {
-    return {
-      certified_kb: kbDir
-        ? this.knowledge.ingestCertifiedKnowledgeBase(kbDir)
-        : null,
-      manifest: manifestPath
-        ? this.knowledge.ingestManifest(manifestPath)
-        : null,
-      status: this.store.stats()
+    const result = {
+      certified_kb: kbDir ? this.knowledge.ingestCertifiedKnowledgeBase(kbDir) : null,
+      manifest: manifestPath ? this.knowledge.ingestManifest(manifestPath) : null
     };
+    return { ...result, maintenance: this.revision.maintenance(), status: this.store.stats() };
   }
 
   observe(observation) {
     const event_id = this.student.observe(observation);
-    return {
-      event_id,
-      state: this.student.reduce(observation.concept_id)
-    };
+    const state = this.student.reduce(observation.concept_id);
+    return { event_id, state };
   }
 
   cycle({ conceptId, mode = 'learning', forceAudit = false } = {}) {
@@ -69,9 +63,39 @@ export class IggyLiveEngine {
     };
   }
 
-  audit() {
-    return this.revision.audit('manual');
+  signalRevisionPressure(pressure) {
+    const pressure_id = this.revision.signalPressure(pressure);
+    return {
+      pressure_id,
+      maintenance: this.revision.maintenance()
+    };
   }
+
+  researchQueue(status = 'queued') {
+    return this.store.listResearchTasks(status);
+  }
+
+  completeResearch({ task_id, result, evidence = null }) {
+    if (!task_id) throw new Error('task_id is required');
+    this.store.completeResearchTask(task_id, result);
+    let evidence_id = null;
+    if (evidence) {
+      evidence_id = this.store.appendEvidence({
+        event_type: 'research_result',
+        epistemic_status: evidence.epistemic_status || 'SOURCE_BACKED',
+        source_ref: evidence.source_ref ?? null,
+        concept_id: evidence.concept_id ?? null,
+        payload: {
+          task_id,
+          result,
+          ...evidence.payload
+        }
+      });
+    }
+    return { task_id, evidence_id, maintenance: this.revision.maintenance() };
+  }
+
+  audit() { return this.revision.audit('manual'); }
 
   status() {
     return {
@@ -79,14 +103,12 @@ export class IggyLiveEngine {
       hard_constitution: HARD_CONSTITUTION,
       store: this.store.stats(),
       open_pressures: this.store.listOpenPressures(),
-      recent_transformations:
-        this.store.listTransformations().slice(0, 20)
+      research_queue: this.store.listResearchTasks('queued'),
+      recent_transformations: this.store.listTransformations().slice(0, 20)
     };
   }
 
-  close() {
-    this.store.close();
-  }
+  close() { this.store.close(); }
 }
 
 export { HARD_CONSTITUTION } from './revision.mjs';

@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.iggy/*.sqlite
+.iggy/*.sqlite-*
+.iggy/*.db
+.iggy/*.db-*

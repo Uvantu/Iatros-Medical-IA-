@@ -23,7 +23,8 @@ const SCHEMA = [
   'CREATE TABLE IF NOT EXISTS resources(resource_id TEXT PRIMARY KEY,concept_id TEXT,spec_json TEXT NOT NULL,created_at TEXT NOT NULL);',
   'CREATE TABLE IF NOT EXISTS revision_pressures(pressure_id TEXT PRIMARY KEY,kind TEXT NOT NULL,target TEXT NOT NULL,severity REAL NOT NULL,context_json TEXT NOT NULL,status TEXT NOT NULL,created_at TEXT NOT NULL,resolved_at TEXT);',
   'CREATE TABLE IF NOT EXISTS transformations(transformation_id TEXT PRIMARY KEY,target TEXT NOT NULL,revision_level INTEGER NOT NULL,proposal_json TEXT NOT NULL,evaluation_policy_json TEXT NOT NULL,status TEXT NOT NULL,created_at TEXT NOT NULL,applied_at TEXT);',
-  'CREATE TABLE IF NOT EXISTS audits(audit_id TEXT PRIMARY KEY,scope TEXT NOT NULL,report_json TEXT NOT NULL,created_at TEXT NOT NULL);'
+  'CREATE TABLE IF NOT EXISTS audits(audit_id TEXT PRIMARY KEY,scope TEXT NOT NULL,report_json TEXT NOT NULL,created_at TEXT NOT NULL);',
+  'CREATE TABLE IF NOT EXISTS research_tasks(task_id TEXT PRIMARY KEY,pressure_id TEXT,query TEXT NOT NULL,status TEXT NOT NULL,result_json TEXT,created_at TEXT NOT NULL,updated_at TEXT NOT NULL);'
 ].join('\n');
 
 export class IggyStore {
@@ -60,7 +61,7 @@ export class IggyStore {
 
   appendEvidence(event) {
     const id = event.event_id || crypto.randomUUID();
-    this.db.prepare('INSERT INTO evidence_events(event_id,event_type,concept_id,source_ref,epistemic_status,payload_json,created_at) VALUES(?,?,?,?,?,?,?)')
+    this.db.prepare('INSERT OR IGNORE INTO evidence_events(event_id,event_type,concept_id,source_ref,epistemic_status,payload_json,created_at) VALUES(?,?,?,?,?,?,?)')
       .run(id, event.event_type, event.concept_id ?? null, event.source_ref ?? null, event.epistemic_status ?? 'OBSERVED', encode(event.payload ?? {}), event.created_at || nowIso());
     return id;
   }
@@ -77,6 +78,11 @@ export class IggyStore {
 
   listClaims(limit = 1000) {
     return this.db.prepare('SELECT * FROM claims ORDER BY created_at LIMIT ?').all(limit)
+      .map((r) => ({ ...r, metadata: parseJson(r.metadata_json, {}) }));
+  }
+
+  listSources(limit = 1000) {
+    return this.db.prepare('SELECT * FROM sources ORDER BY updated_at DESC LIMIT ?').all(limit)
       .map((r) => ({ ...r, metadata: parseJson(r.metadata_json, {}) }));
   }
 
@@ -107,7 +113,7 @@ export class IggyStore {
 
   addPressure({ kind, target, severity = 0.5, context = {} }) {
     const id = stableId(kind, target, encode(context.signature ?? context));
-    if (this.db.prepare("SELECT pressure_id FROM revision_pressures WHERE pressure_id=? AND status='open'").get(id)) return id;
+    if (this.db.prepare('SELECT pressure_id FROM revision_pressures WHERE pressure_id=?').get(id)) return id;
     this.db.prepare("INSERT INTO revision_pressures(pressure_id,kind,target,severity,context_json,status,created_at) VALUES(?,?,?,?,?,'open',?)")
       .run(id, kind, target, clamp01(severity), encode(context), nowIso());
     return id;
@@ -126,6 +132,35 @@ export class IggyStore {
   listTransformations() { return this.db.prepare('SELECT * FROM transformations ORDER BY created_at DESC').all().map((r) => ({ ...r, proposal: parseJson(r.proposal_json, {}), evaluation_policy: parseJson(r.evaluation_policy_json, {}) })); }
   applyTransformation(id) { this.db.prepare("UPDATE transformations SET status='applied',applied_at=? WHERE transformation_id=?").run(nowIso(), id); }
 
+  hasTransformationForPressure(pressureId) {
+    return this.listTransformations().some((t) =>
+      t.proposal?.pressure_ref === pressureId &&
+      !['rejected', 'rolled_back'].includes(t.status)
+    );
+  }
+
+  queueResearchTask({ pressure_id = null, query, status = 'queued' }) {
+    const id = stableId('research', pressure_id, query);
+    const now = nowIso();
+    this.db.prepare(
+      'INSERT INTO research_tasks(task_id,pressure_id,query,status,result_json,created_at,updated_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(task_id) DO UPDATE SET updated_at=excluded.updated_at'
+    ).run(id, pressure_id, query, status, null, now, now);
+    return id;
+  }
+
+  listResearchTasks(status = null) {
+    const rows = status
+      ? this.db.prepare('SELECT * FROM research_tasks WHERE status=? ORDER BY created_at').all(status)
+      : this.db.prepare('SELECT * FROM research_tasks ORDER BY created_at').all();
+    return rows.map((r) => ({ ...r, result: parseJson(r.result_json, null) }));
+  }
+
+  completeResearchTask(taskId, result) {
+    this.db.prepare(
+      "UPDATE research_tasks SET status='completed',result_json=?,updated_at=? WHERE task_id=?"
+    ).run(encode(result), nowIso(), taskId);
+  }
+
   appendAudit(scope, report) {
     const id = crypto.randomUUID();
     this.db.prepare('INSERT INTO audits(audit_id,scope,report_json,created_at) VALUES(?,?,?,?)').run(id, scope, encode(report), nowIso());
@@ -135,6 +170,6 @@ export class IggyStore {
 
   stats() {
     const count = (table) => Number(this.db.prepare('SELECT COUNT(*) AS n FROM ' + table).get().n);
-    return { db_path: this.dbPath, schema_version: this.getMeta('schema_version'), cycle_count: Number(this.getMeta('cycle_count') || 0), sources: count('sources'), claims: count('claims'), evidence_events: count('evidence_events'), student_states: count('student_states'), decisions: count('decisions'), resources: count('resources'), revision_pressures_open: Number(this.db.prepare("SELECT COUNT(*) AS n FROM revision_pressures WHERE status='open'").get().n), transformations: count('transformations'), audits: count('audits'), last_audit_at: this.getMeta('last_audit_at') };
+    return { db_path: this.dbPath, schema_version: this.getMeta('schema_version'), cycle_count: Number(this.getMeta('cycle_count') || 0), sources: count('sources'), claims: count('claims'), evidence_events: count('evidence_events'), student_states: count('student_states'), decisions: count('decisions'), resources: count('resources'), revision_pressures_open: Number(this.db.prepare("SELECT COUNT(*) AS n FROM revision_pressures WHERE status='open'").get().n), transformations: count('transformations'), audits: count('audits'), research_tasks: count('research_tasks'), last_audit_at: this.getMeta('last_audit_at') };
   }
 }

@@ -18,17 +18,16 @@ const { values, positionals } = parseArgs({
     transfer: { type: 'boolean' },
     misconception: { type: 'string' },
     mode: { type: 'string' },
+    kind: { type: 'string' },
+    target: { type: 'string' },
+    severity: { type: 'string' },
     'force-audit': { type: 'boolean' }
   }
 });
 
 const command = positionals[0] || 'status';
 const engine = new IggyLiveEngine({
-  dbPath: path.resolve(
-    values.db ||
-    process.env.IGGY_DB_PATH ||
-    '.iggy/iggy-live.sqlite'
-  )
+  dbPath: path.resolve(values.db || process.env.IGGY_DB_PATH || '.iggy/iggy-live.sqlite')
 });
 
 try {
@@ -37,24 +36,13 @@ try {
   if (command === 'init' || command === 'status') {
     result = engine.status();
   } else if (command === 'ingest') {
-    result = engine.ingest({
-      kbDir: values.kb,
-      manifestPath: values.manifest
-    });
+    result = engine.ingest({ kbDir: values.kb, manifestPath: values.manifest });
   } else if (command === 'observe') {
     result = engine.observe({
       concept_id: values.concept,
-      correct:
-        values.correct === '1' ||
-        values.correct === 'true',
-      confidence:
-        values.confidence == null
-          ? null
-          : Number(values.confidence),
-      latency_ms:
-        values.latency == null
-          ? null
-          : Number(values.latency),
+      correct: values.correct === '1' || values.correct === 'true',
+      confidence: values.confidence == null ? null : Number(values.confidence),
+      latency_ms: values.latency == null ? null : Number(values.latency),
       representation: values.representation ?? null,
       operation: values.operation ?? null,
       transfer: Boolean(values.transfer),
@@ -66,6 +54,15 @@ try {
       mode: values.mode || 'learning',
       forceAudit: Boolean(values['force-audit'])
     });
+  } else if (command === 'pressure') {
+    result = engine.signalRevisionPressure({
+      kind: values.kind || 'ANOMALY',
+      target: values.target || 'unspecified',
+      severity: values.severity == null ? 0.5 : Number(values.severity),
+      context: {}
+    });
+  } else if (command === 'research-queue') {
+    result = engine.researchQueue();
   } else if (command === 'audit') {
     result = engine.audit();
   } else {
